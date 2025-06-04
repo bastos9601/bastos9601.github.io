@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Control de Asistencia</title>
+  <link rel="stylesheet" href="/assets/css/asistencia.css" />
+</head>
+<body>
+<header>
+  <div class="logo">
+    <a href="index.html">
+      <img src="/assets/IMG/LOGO DSI-2022.png" alt="Logo DSI">
+      <span class="logo-text">CONTROL DE ASISTENCIA</span>
+    </a>
+  </div>
+
+  <nav class="menu-principal" aria-label="Menú principal">
+    <a href="reportes.html">Reportes</a>
+    <a href="historial.html">Historial</a>
+    <a href="configurar.html">Configurar</a>
+  </nav>
+</header>
+
+
+  <main>
+    <section class="bienvenida" aria-labelledby="bienvenida-title">
+      <h2 id="bienvenida-title">Bienvenido</h2>
+      <p>Escanea tu código QR</p>
+      <div class="qr" role="img" aria-label="Código QR para registro de asistencia">
+        <img
+          src="https://api.qrserver.com/v1/create-qr-code/?data=asistencia123&size=150x150"
+          alt="Código QR de asistencia"
+          width="150"
+          height="150"
+        />
+      </div>
+    </section>
+
+    <section class="instrucciones" aria-labelledby="instrucciones-title">
+      <h3 id="instrucciones-title">Instrucciones</h3>
+      <button
+        type="button"
+        aria-expanded="false"
+        aria-controls="instrucciones-detalle"
+        id="btn-instrucciones"
+      >
+        Ver instrucciones
+      </button>
+      <div id="instrucciones-detalle" hidden>
+        <p>
+          1. Escanea el código QR con tu móvil.<br />
+          2. Confirma tu entrada o salida.<br />
+          3. Revisa tus registros.
+        </p>
+      </div>
+    </section>
+
+    <section class="registros" aria-labelledby="registros-title">
+      <h3 id="registros-title">Registros Recientes</h3>
+      <ul>
+        <li><span class="estado entrada">Registro A</span> Entrada - 24 abr. 2024</li>
+        <li><span class="estado salida">Salida</span> Salida - 23 abr. 2024</li>
+        <li><span class="estado entrada">Registro C</span> Entrada - 23 abr. 2024</li>
+      </ul>
+    </section>
+
+    <section class="registro-manual">
+      <h3>Registro Manual</h3>
+      <form>
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required />
+
+        <label for="dni">DNI:</label>
+        <input type="text" id="dni" name="dni" placeholder="DNI o código" required />
+
+        <button type="submit">Registrar</button>
+      </form>
+    </section>
+
+    <section class="hora-actual">
+      <h3>Fecha y Hora Actual</h3>
+      <p id="fechaHora"></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Control de Asistencia. Todos los derechos reservados.</p>
+  </footer>
+
+  <script>
+    const fechaHora = document.getElementById("fechaHora");
+    setInterval(() => {
+      const ahora = new Date();
+      fechaHora.textContent = ahora.toLocaleString();
+    }, 1000);
+
+    const btn = document.getElementById('btn-instrucciones');
+    const detalle = document.getElementById('instrucciones-detalle');
+
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !expanded);
+      detalle.hidden = expanded;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reportes - Control de Asistencia</title>
+  <link rel="stylesheet" href="/assets/css/reportes.css" />
+</head>
+<body>
+<header>
+  <div class="logo">
+    <a href="index.html">
+      <img src="/assets/IMG/LOGO DSI-2022.png" alt="Logo DSI">
+      <span class="logo-text">CONTROL DE ASISTENCIA</span>
+    </a>
+  </div>
+
+  <nav class="menu-principal" aria-label="Menú principal">
+    <a href="reportes.html">Reportes</a>
+    <a href="historial.html">Historial</a>
+    <a href="configurar.html">Configurar</a>
+  </nav>
+</header>
+
+  <main>
+    <section>
+      <h2>Generar Reportes</h2>
+      <p>Selecciona el rango de fechas para generar el reporte de asistencia.</p>
+
+      <form>
+        <label for="fecha-inicio">Desde:</label>
+        <input type="date" id="fecha-inicio" name="fecha-inicio" required>
+
+        <label for="fecha-fin">Hasta:</label>
+        <input type="date" id="fecha-fin" name="fecha-fin" required>
+
+        <button type="submit">Generar Reporte</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Control de Asistencia. Todos los derechos reservados.</p>
+  </footer>
+</body>
+</html>
