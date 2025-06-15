@@ -1,108 +1,239 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Control de Asistencia</title>
-  <link rel="stylesheet" href="/assets/css/asistencia.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencia QR - Inicio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <link rel="stylesheet" href="assets/css/asistencia.css">
 </head>
 <body>
-<header>
-  <div class="logo">
-    <a href="index.html">
-      <img src="/assets/IMG/LOGO DSI-2022.png" alt="Logo DSI">
-      <span class="logo-text">CONTROL DE ASISTENCIA</span>
-    </a>
-  </div>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="/assets/IMG/LOGO DSI-2022.png" alt="Logo DSI">
+                        <span class="logo-text">CONTROL DE ASISTENCIA</span>
+                    </a>
+                </div>
+                <div class="status-badge">
+                    <span class="material-icons" style="font-size: 1.1rem; vertical-align: middle; margin-right: 8px;">access_time</span>
+                    Sistema Activo
+                </div>
+            </div>
+        </div>
+    </header>
 
-  <nav class="menu-principal" aria-label="Menú principal">
-    <a href="reportes.html">Reportes</a>
-    <a href="historial.html">Historial</a>
-    <a href="configurar.html">Configurar</a>
-  </nav>
-</header>
+    <main class="container">
+        <!-- Navegación por pestañas -->
+        <div class="nav-tabs">
+            <button class="tab-button active">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">qr_code</span>
+                GENERAR QR
+            </button>
+            <button class="tab-button" onclick="window.location.href='escanear.html'">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">qr_code_scanner</span>
+                ESCANEAR
+            </button>
+            <button class="tab-button" onclick="window.location.href='asistencia.html'">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">people</span>
+                ASISTENCIA
+            </button>
+            <button class="tab-button" onclick="window.location.href='reportes.html'">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">assessment</span>
+                REPORTES
+            </button>
+        </div>
 
+        <!-- Panel: Generador de QR -->
+        <div class="panel active">
+            <h2 class="panel-title">
+                <span class="material-icons" style="font-size: inherit; vertical-align: middle; margin-right: 16px;">qr_code</span>
+                GENERADOR DE CÓDIGOS QR
+            </h2>
 
-  <main>
-    <section class="bienvenida" aria-labelledby="bienvenida-title">
-      <h2 id="bienvenida-title">Bienvenido</h2>
-      <p>Escanea tu código QR</p>
-      <div class="qr" role="img" aria-label="Código QR para registro de asistencia">
-        <img
-          src="https://api.qrserver.com/v1/create-qr-code/?data=asistencia123&size=150x150"
-          alt="Código QR de asistencia"
-          width="150"
-          height="150"
-        />
-      </div>
-    </section>
+            <form id="qrForm" class="form">
+                <div class="form-group">
+                    <label for="personName" class="form-label">
+                        <span class="material-icons" style="font-size: 1.4rem; vertical-align: middle; margin-right: 8px;">person</span>
+                        NOMBRE COMPLETO
+                    </label>
+                    <input type="text" id="personName" class="form-input" placeholder="Ingrese el nombre completo" required>
+                </div>
 
-    <section class="instrucciones" aria-labelledby="instrucciones-title">
-      <h3 id="instrucciones-title">Instrucciones</h3>
-      <button
-        type="button"
-        aria-expanded="false"
-        aria-controls="instrucciones-detalle"
-        id="btn-instrucciones"
-      >
-        Ver instrucciones
-      </button>
-      <div id="instrucciones-detalle" hidden>
-        <p>
-          1. Escanea el código QR con tu móvil.<br />
-          2. Confirma tu entrada o salida.<br />
-          3. Revisa tus registros.
-        </p>
-      </div>
-    </section>
+                <div class="form-group">
+                    <label for="personId" class="form-label">
+                        <span class="material-icons" style="font-size: 1.4rem; vertical-align: middle; margin-right: 8px;">badge</span>
+                        ID / DOCUMENTO
+                    </label>
+                    <input type="text" id="personId" class="form-input" placeholder="Ingrese ID o número de documento" required>
+                </div>
 
-    <section class="registros" aria-labelledby="registros-title">
-      <h3 id="registros-title">Registros Recientes</h3>
-      <ul>
-        <li><span class="estado entrada">Registro A</span> Entrada - 24 abr. 2024</li>
-        <li><span class="estado salida">Salida</span> Salida - 23 abr. 2024</li>
-        <li><span class="estado entrada">Registro C</span> Entrada - 23 abr. 2024</li>
-      </ul>
-    </section>
+                <div class="form-group">
+                    <label for="department" class="form-label">
+                        <span class="material-icons" style="font-size: 1.4rem; vertical-align: middle; margin-right: 8px;">business</span>
+                        DEPARTAMENTO / ÁREA
+                    </label>
+                    <input type="text" id="department" class="form-input" placeholder="Ej: Administración, Ventas, IT">
+                </div>
 
-    <section class="registro-manual">
-      <h3>Registro Manual</h3>
-      <form>
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required />
+                <button type="submit" class="btn-primary" id="generateBtn">
+                    <span class="material-icons">qr_code</span>
+                    GENERAR CÓDIGO QR
+                </button>
+            </form>
 
-        <label for="dni">DNI:</label>
-        <input type="text" id="dni" name="dni" placeholder="DNI o código" required />
+            <div class="loading" id="qrLoading">
+                <div class="loading-spinner"></div>
+                <p>Generando código QR...</p>
+            </div>
 
-        <button type="submit">Registrar</button>
-      </form>
-    </section>
+            <div id="qrResult" class="qr-display" style="display: none;">
+                <div class="card-header">CÓDIGO QR GENERADO EXITOSAMENTE</div>
+                <div id="qrcode" class="qr-code"></div>
+                <div class="qr-info" id="qrInfo"></div>
+                <button onclick="downloadQR()" class="btn-primary" style="margin-top: 20px;">
+                    <span class="material-icons">download</span>
+                    DESCARGAR QR
+                </button>
+            </div>
+        </div>
+    </main>
 
-    <section class="hora-actual">
-      <h3>Fecha y Hora Actual</h3>
-      <p id="fechaHora"></p>
-    </section>
-  </main>
+    <script src="js/common.js"></script>
+    <script>
+        // Variables específicas del generador
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
 
-  <footer>
-    <p>&copy; 2025 Control de Asistencia. Todos los derechos reservados.</p>
-  </footer>
+        // Función para generar el código QR
+        function generateQRCode(data, targetElement) {
+            return new Promise((resolve, reject) => {
+                try {
+                    if (typeof QRCode !== 'undefined' && QRCode.toCanvas) {
+                        QRCode.toCanvas(data, {
+                            width: 256,
+                            height: 256,
+                            color: {
+                                dark: '#1a4b8c',
+                                light: '#ffffff'
+                            }
+                        }, (error, canvas) => {
+                            if (error) {
+                                console.error('Error con QRCode.toCanvas:', error);
+                                reject(error);
+                            } else {
+                                targetElement.innerHTML = '';
+                                targetElement.appendChild(canvas);
+                                resolve(canvas);
+                            }
+                        });
+                    } else {
+                        // Fallback usando servicio web
+                        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(data)}&color=1a4b8c&bgcolor=ffffff`;
+                        targetElement.innerHTML = `<img src="${qrUrl}" alt="Código QR" style="max-width: 256px; height: auto; border: 2px solid #1a4b8c; border-radius: 8px;">`;
+                        resolve(qrUrl);
+                    }
+                } catch (error) {
+                    console.error('Error al generar QR:', error);
+                    reject(error);
+                }
+            });
+        }
 
-  <script>
-    const fechaHora = document.getElementById("fechaHora");
-    setInterval(() => {
-      const ahora = new Date();
-      fechaHora.textContent = ahora.toLocaleString();
-    }, 1000);
+        // Generar código QR
+        async function generateQR(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('personName').value.trim();
+            const id = document.getElementById('personId').value.trim();
+            const department = document.getElementById('department').value.trim();
 
-    const btn = document.getElementById('btn-instrucciones');
-    const detalle = document.getElementById('instrucciones-detalle');
+            if (!name || !id) {
+                alert('Por favor complete todos los campos obligatorios (Nombre e ID)');
+                return;
+            }
 
-    btn.addEventListener('click', () => {
-      const expanded = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', !expanded);
-      detalle.hidden = expanded;
-    });
-  </script>
+            // Mostrar loading
+            document.getElementById('qrLoading').classList.add('show');
+            document.getElementById('qrResult').style.display = 'none';
+
+            try {
+                const qrData = {
+                    id: id,
+                    name: name,
+                    department: department || 'Sin departamento',
+                    generated: new Date().toISOString(),
+                    timestamp: Date.now()
+                };
+
+                // Registrar usuario
+                const existingUser = registeredUsers.find(user => user.id === id);
+                if (!existingUser) {
+                    registeredUsers.push(qrData);
+                } else {
+                    Object.assign(existingUser, qrData);
+                }
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+
+                // Generar QR code
+                const qrText = JSON.stringify(qrData);
+                const qrDiv = document.getElementById('qrcode');
+                
+                await generateQRCode(qrText, qrDiv);
+                
+                document.getElementById('qrInfo').innerHTML = `
+                    <strong>Nombre:</strong> ${name}<br>
+                    <strong>ID:</strong> ${id}<br>
+                    <strong>Departamento:</strong> ${department || 'Sin especificar'}<br>
+                    <strong>Generado:</strong> ${new Date().toLocaleString('es-ES')}
+                `;
+                
+                document.getElementById('qrLoading').classList.remove('show');
+                document.getElementById('qrResult').style.display = 'block';
+                document.getElementById('qrForm').reset();
+                
+                document.getElementById('qrResult').classList.add('success-flash');
+                setTimeout(() => {
+                    document.getElementById('qrResult').classList.remove('success-flash');
+                }, 600);
+                
+            } catch (error) {
+                console.error('Error al generar el código QR:', error);
+                document.getElementById('qrLoading').classList.remove('show');
+                alert('Error al generar el código QR. Por favor, inténtelo de nuevo.');
+            }
+        }
+
+        // Descargar QR
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            const img = document.querySelector('#qrcode img');
+            
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = `qr_codigo_${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            } else if (img) {
+                const link = document.createElement('a');
+                link.download = `qr_codigo_${new Date().getTime()}.png`;
+                link.href = img.src;
+                link.target = '_blank';
+                link.click();
+            } else {
+                alert('No hay código QR para descargar');
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inicializando generador QR...');
+            document.getElementById('qrForm').addEventListener('submit', generateQR);
+            console.log('Generador QR inicializado correctamente');
+        });
+    </script>
 </body>
 </html>

@@ -1,46 +1,549 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Reportes - Control de Asistencia</title>
-  <link rel="stylesheet" href="/assets/css/reportes.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Control de Asistencia QR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/asistencia.css">
 </head>
 <body>
-<header>
-  <div class="logo">
-    <a href="index.html">
-      <img src="/assets/IMG/LOGO DSI-2022.png" alt="Logo DSI">
-      <span class="logo-text">CONTROL DE ASISTENCIA</span>
-    </a>
-  </div>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="/assets/IMG/LOGO DSI-2022.png" alt="Logo DSI">
+                        <span class="logo-text">REPORTES DE ASISTENCIA</span>
+                    </a>
+                </div>
+                <div class="status-badge">
+                    <span class="material-icons" style="font-size: 1.1rem; vertical-align: middle; margin-right: 8px;">access_time</span>
+                    Sistema Activo
+                </div>
+            </div>
+        </div>
+    </header>
 
-  <nav class="menu-principal" aria-label="Menú principal">
-    <a href="reportes.html">Reportes</a>
-    <a href="historial.html">Historial</a>
-    <a href="configurar.html">Configurar</a>
-  </nav>
-</header>
+    <main class="container">
+        <!-- Navegación -->
+        <div class="nav-tabs">
+            <button class="tab-button" onclick="window.location.href='index.html'">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">qr_code</span>
+                GENERAR QR
+            </button>
+            <button class="tab-button" onclick="window.location.href='asistencia.html'">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">qr_code_scanner</span>
+                ESCANEAR
+            </button>
+            <button class="tab-button" onclick="window.location.href='asistencia.html'">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">people</span>
+                ASISTENCIA
+            </button>
+            <button class="tab-button active">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">assessment</span>
+                REPORTES
+            </button>
+        </div>
 
-  <main>
-    <section>
-      <h2>Generar Reportes</h2>
-      <p>Selecciona el rango de fechas para generar el reporte de asistencia.</p>
+        <!-- Panel de Reportes -->
+        <div class="panel active">
+            <h2 class="panel-title">
+                <span class="material-icons" style="font-size: inherit; vertical-align: middle; margin-right: 16px;">assessment</span>
+                REPORTES Y ESTADÍSTICAS
+            </h2>
 
-      <form>
-        <label for="fecha-inicio">Desde:</label>
-        <input type="date" id="fecha-inicio" name="fecha-inicio" required>
+            <!-- Controles de filtros -->
+            <div class="filters-section" style="margin-bottom: 32px;">
+                <h3 style="font-size: 1.6rem; font-weight: 600; color: var(--color-primario); margin-bottom: 16px;">
+                    <span class="material-icons" style="font-size: inherit; vertical-align: middle; margin-right: 8px;">filter_list</span>
+                    FILTROS DE REPORTE
+                </h3>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: end;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">FECHA INICIO</label>
+                        <input type="date" id="startDate" class="form-input" style="width: auto;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">FECHA FIN</label>
+                        <input type="date" id="endDate" class="form-input" style="width: auto;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">DEPARTAMENTO</label>
+                        <select id="departmentFilter" class="form-input" style="width: auto;">
+                            <option value="">Todos los departamentos</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="applyFilters()">
+                        <span class="material-icons">search</span>
+                        APLICAR FILTROS
+                    </button>
+                    <button class="btn-secondary" onclick="clearFilters()">
+                        <span class="material-icons">clear</span>
+                        LIMPIAR
+                    </button>
+                </div>
+            </div>
 
-        <label for="fecha-fin">Hasta:</label>
-        <input type="date" id="fecha-fin" name="fecha-fin" required>
+            <!-- Estadísticas principales -->
+            <div class="grid">
+                <div class="grid-item">
+                    <div class="stat-number" id="weekAttendance">0</div>
+                    <div class="stat-label">ASISTENCIAS ESTA SEMANA</div>
+                </div>
+                <div class="grid-item">
+                    <div class="stat-number" id="monthAttendance">0</div>
+                    <div class="stat-label">ASISTENCIAS ESTE MES</div>
+                </div>
+                <div class="grid-item">
+                    <div class="stat-number" id="activeUsers">0</div>
+                    <div class="stat-label">USUARIOS ACTIVOS</div>
+                </div>
+                <div class="grid-item">
+                    <div class="stat-number" id="avgDaily">0</div>
+                    <div class="stat-label">PROMEDIO DIARIO</div>
+                </div>
+            </div>
 
-        <button type="submit">Generar Reporte</button>
-      </form>
-    </section>
-  </main>
+            <!-- Botones de exportación -->
+            <div style="margin: 32px 0; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
+                <button class="btn-primary" onclick="exportDetailedReport()">
+                    <span class="material-icons">file_download</span>
+                    EXPORTAR REPORTE DETALLADO
+                </button>
+                <button class="btn-primary" onclick="exportSummaryReport()">
+                    <span class="material-icons">summarize</span>
+                    EXPORTAR RESUMEN
+                </button>
+                <button class="btn-secondary" onclick="printReport()">
+                    <span class="material-icons">print</span>
+                    IMPRIMIR REPORTE
+                </button>
+            </div>
 
-  <footer>
-    <p>&copy; 2025 Control de Asistencia. Todos los derechos reservados.</p>
-  </footer>
+            <!-- Estadísticas por departamento -->
+            <div style="margin-top: 40px;">
+                <h3 style="font-size: 1.8rem; font-weight: 700; color: var(--color-primario); margin-bottom: 24px; text-align: center;">
+                    <span class="material-icons" style="font-size: inherit; vertical-align: middle; margin-right: 12px;">business</span>
+                    ASISTENCIA POR DEPARTAMENTO
+                </h3>
+                <div class="attendance-list" id="departmentStats">
+                    <div style="text-align: center; color: var(--color-texto-claro); font-size: 1.2rem; padding: 40px;">
+                        <span class="material-icons" style="font-size: 3rem; display: block; margin-bottom: 16px; color: var(--color-primario);">business</span>
+                        Los datos por departamento se mostrarán aquí conforme se registren asistencias
+                    </div>
+                </div>
+            </div>
+
+            <!-- Horarios de mayor asistencia -->
+            <div style="margin-top: 40px;">
+                <h3 style="font-size: 1.8rem; font-weight: 700; color: var(--color-primario); margin-bottom: 24px; text-align: center;">
+                    <span class="material-icons" style="font-size: inherit; vertical-align: middle; margin-right: 12px;">schedule</span>
+                    HORARIOS DE MAYOR ASISTENCIA
+                </h3>
+                <div class="attendance-list" id="timeStats">
+                    <div style="text-align: center; color: var(--color-texto-claro); font-size: 1.2rem; padding: 40px;">
+                        <span class="material-icons" style="font-size: 3rem; display: block; margin-bottom: 16px; color: var(--color-primario);">schedule</span>
+                        Los datos de horarios se mostrarán aquí conforme se registren asistencias
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usuarios más activos -->
+            <div style="margin-top: 40px;">
+                <h3 style="font-size: 1.8rem; font-weight: 700; color: var(--color-primario); margin-bottom: 24px; text-align: center;">
+                    <span class="material-icons" style="font-size: inherit; vertical-align: middle; margin-right: 12px;">star</span>
+                    USUARIOS MÁS ACTIVOS
+                </h3>
+                <div class="attendance-list" id="topUsers">
+                    <div style="text-align: center; color: var(--color-texto-claro); font-size: 1.2rem; padding: 40px;">
+                        <span class="material-icons" style="font-size: 3rem; display: block; margin-bottom: 16px; color: var(--color-primario);">people</span>
+                        Los usuarios más activos se mostrarán aquí
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tendencias por fecha -->
+            <div style="margin-top: 40px;">
+                <h3 style="font-size: 1.8rem; font-weight: 700; color: var(--color-primario); margin-bottom: 24px; text-align: center;">
+                    <span class="material-icons" style="font-size: inherit; vertical-align: middle; margin-right: 12px;">trending_up</span>
+                    TENDENCIAS DE ASISTENCIA
+                </h3>
+                <div class="attendance-list" id="attendanceTrends">
+                    <div style="text-align: center; color: var(--color-texto-claro); font-size: 1.2rem; padding: 40px;">
+                        <span class="material-icons" style="font-size: 3rem; display: block; margin-bottom: 16px; color: var(--color-primario);">trending_up</span>
+                        Las tendencias de asistencia se mostrarán aquí
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Variables globales
+        let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || [];
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+        let filteredData = [...attendanceData];
+
+        // Inicializar fechas por defecto
+        function initializeDates() {
+            const today = new Date();
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            document.getElementById('startDate').value = startOfMonth.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+        }
+
+        // Cargar departamentos únicos
+        function loadDepartments() {
+            const departments = [...new Set(registeredUsers.map(user => user.department))];
+            const select = document.getElementById('departmentFilter');
+            
+            departments.forEach(dept => {
+                if (dept && dept !== 'Sin departamento') {
+                    const option = document.createElement('option');
+                    option.value = dept;
+                    option.textContent = dept;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        // Aplicar filtros
+        function applyFilters() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const department = document.getElementById('departmentFilter').value;
+
+            filteredData = attendanceData.filter(record => {
+                const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+                
+                let matchesDate = true;
+                if (startDate && endDate) {
+                    matchesDate = recordDate >= startDate && recordDate <= endDate;
+                }
+                
+                let matchesDepartment = true;
+                if (department) {
+                    matchesDepartment = record.department === department;
+                }
+                
+                return matchesDate && matchesDepartment;
+            });
+
+            updateAllStats();
+        }
+
+        // Limpiar filtros
+        function clearFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('departmentFilter').value = '';
+            filteredData = [...attendanceData];
+            initializeDates();
+            updateAllStats();
+        }
+
+        // Actualizar todas las estadísticas
+        function updateAllStats() {
+            updateMainStats();
+            updateDepartmentStats();
+            updateTimeStats();
+            updateTopUsers();
+            updateTrends();
+        }
+
+        // Actualizar estadísticas principales
+        function updateMainStats() {
+            const today = new Date();
+            const todayStr = today.toDateString();
+            
+            const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
+            const weekAttendance = filteredData.filter(record => 
+                new Date(record.timestamp) >= weekStart
+            ).length;
+
+            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            const monthAttendance = filteredData.filter(record => 
+                new Date(record.timestamp) >= monthStart
+            ).length;
+
+            const activeUsers = new Set(filteredData.map(r => r.id)).size;
+            const avgDaily = filteredData.length > 0 ? Math.round(filteredData.length / 30) : 0;
+
+            document.getElementById('weekAttendance').textContent = weekAttendance;
+            document.getElementById('monthAttendance').textContent = monthAttendance;
+            document.getElementById('activeUsers').textContent = activeUsers;
+            document.getElementById('avgDaily').textContent = avgDaily;
+        }
+
+        // Estadísticas por departamento
+        function updateDepartmentStats() {
+            const container = document.getElementById('departmentStats');
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--color-texto-claro); font-size: 1.2rem; padding: 40px;">
+                        <span class="material-icons" style="font-size: 3rem; display: block; margin-bottom: 16px; color: var(--color-primario);">business</span>
+                        No hay datos para mostrar con los filtros aplicados
+                    </div>
+                `;
+                return;
+            }
+
+            const departmentCounts = {};
+            filteredData.forEach(record => {
+                const dept = record.department || 'Sin departamento';
+                departmentCounts[dept] = (departmentCounts[dept] || 0) + 1;
+            });
+
+            const sortedDepartments = Object.entries(departmentCounts)
+                .sort(([,a], [,b]) => b - a);
+
+            container.innerHTML = sortedDepartments.map(([dept, count]) => `
+                <div class="attendance-item">
+                    <div class="person-info">
+                        <div class="person-name">
+                            <span class="material-icons" style="font-size: 1.4rem; vertical-align: middle; margin-right: 8px;">business</span>
+                            ${dept}
+                        </div>
+                        <div class="person-time">
+                            <span class="material-icons" style="font-size: 1.1rem; vertical-align: middle; margin-right: 8px;">people</span>
+                            ${count} asistencias registradas
+                        </div>
+                    </div>
+                    <div class="status-present">
+                        <span class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 4px;">trending_up</span>
+                        ${count}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Estadísticas de horarios
+        function updateTimeStats() {
+            const container = document.getElementById('timeStats');
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--color-texto-claro); font-size: 1.2rem; padding: 40px;">
+                        <span class="material-icons" style="font-size: 3rem; display: block; margin-bottom: 16px; color: var(--color-primario);">schedule</span>
+                        No hay datos para mostrar con los filtros aplicados
+                    </div>
+                `;
+                return;
+            }
+
+            const hourCounts = {};
+            filteredData.forEach(record => {
+                const hour = new Date(record.timestamp).getHours();
+                const hourRange = `${hour}:00 - ${hour + 1}:00`;
+                hourCounts[hourRange] = (hourCounts[hourRange] || 0) + 1;
+            });
+
+            const sortedHours = Object.entries(hourCounts)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5);
+
+            container.innerHTML = sortedHours.map(([hour, count]) => `
+                <div class="attendance-item">
+                    <div class="person-info">
+                        <div class="person-name">
+                            <span class="material-icons" style="font-size: 1.4rem; vertical-align: middle; margin-right: 8px;">schedule</span>
+                            ${hour}
+                        </div>
+                        <div class="person-time">
+                            <span class="material-icons" style="font-size: 1.1rem; vertical-align: middle; margin-right: 8px;">people</span>
+                            ${count} registros en este horario
+                        </div>
+                    </div>
+                    <div class="status-present">
+                        <span class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 4px;">trending_up</span>
+                        ${count}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Usuarios más activos
+        function updateTopUsers() {
+            const container = document.getElementById('topUsers');
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--color-texto-claro); font-size: 1.2rem; padding: 40px;">
+                        <span class="material-icons" style="font-size: 3rem; display: block; margin-bottom: 16px; color: var(--color-primario);">people</span>
+                        No hay datos para mostrar con los filtros aplicados
+                    </div>
+                `;
+                return;
+            }
+
+            const userCounts = {};
+            filteredData.forEach(record => {
+                const key = `${record.name} (${record.id})`;
+                userCounts[key] = (userCounts[key] || 0) + 1;
+            });
+
+            const sortedUsers = Object.entries(userCounts)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10);
+
+            container.innerHTML = sortedUsers.map(([user, count], index) => `
+                <div class="attendance-item">
+                    <div class="person-info">
+                        <div class="person-name">
+                            <span class="material-icons" style="font-size: 1.4rem; vertical-align: middle; margin-right: 8px;">${index < 3 ? 'star' : 'person'}</span>
+                            ${user}
+                        </div>
+                        <div class="person-time">
+                            <span class="material-icons" style="font-size: 1.1rem; vertical-align: middle; margin-right: 8px;">schedule</span>
+                            ${count} asistencias registradas
+                        </div>
+                    </div>
+                    <div class="status-present">
+                        <span class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 4px;">trending_up</span>
+                        ${count}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Tendencias de asistencia
+        function updateTrends() {
+            const container = document.getElementById('attendanceTrends');
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--color-texto-claro); font-size: 1.2rem; padding: 40px;">
+                        <span class="material-icons" style="font-size: 3rem; display: block; margin-bottom: 16px; color: var(--color-primario);">trending_up</span>
+                        No hay datos para mostrar con los filtros aplicados
+                    </div>
+                `;
+                return;
+            }
+
+            const dateCounts = {};
+            filteredData.forEach(record => {
+                const date = new Date(record.timestamp).toLocaleDateString('es-ES');
+                dateCounts[date] = (dateCounts[date] || 0) + 1;
+            });
+
+            const sortedDates = Object.entries(dateCounts)
+                .sort(([a,], [b,]) => new Date(a.split('/').reverse().join('-')) - new Date(b.split('/').reverse().join('-')))
+                .slice(-7);
+
+            container.innerHTML = sortedDates.map(([date, count]) => `
+                <div class="attendance-item">
+                    <div class="person-info">
+                        <div class="person-name">
+                            <span class="material-icons" style="font-size: 1.4rem; vertical-align: middle; margin-right: 8px;">calendar_today</span>
+                            ${date}
+                        </div>
+                        <div class="person-time">
+                            <span class="material-icons" style="font-size: 1.1rem; vertical-align: middle; margin-right: 8px;">people</span>
+                            ${count} asistencias ese día
+                        </div>
+                    </div>
+                    <div class="status-present">
+                        <span class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 4px;">trending_up</span>
+                        ${count}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Exportar reporte detallado
+        function exportDetailedReport() {
+            if (filteredData.length === 0) {
+                alert('No hay datos para exportar con los filtros aplicados');
+                return;
+            }
+
+            let csvContent = "Nombre,ID,Departamento,Fecha,Hora,Día de la Semana\n";
+            filteredData.forEach(record => {
+                const date = new Date(record.timestamp);
+                const dayOfWeek = date.toLocaleDateString('es-ES', { weekday: 'long' });
+                csvContent += `"${record.name}","${record.id}","${record.department}","${date.toLocaleDateString('es-ES')}","${date.toLocaleTimeString('es-ES')}","${dayOfWeek}"\n`;
+            });
+
+            downloadCSV(csvContent, `reporte_detallado_${new Date().toISOString().slice(0,10)}.csv`);
+        }
+
+        // Exportar reporte resumen
+        function exportSummaryReport() {
+            if (filteredData.length === 0) {
+                alert('No hay datos para exportar con los filtros aplicados');
+                return;
+            }
+
+            const userCounts = {};
+            filteredData.forEach(record => {
+                const key = record.id;
+                if (!userCounts[key]) {
+                    userCounts[key] = {
+                        name: record.name,
+                        department: record.department,
+                        count: 0
+                    };
+                }
+                userCounts[key].count++;
+            });
+
+            let csvContent = "Nombre,ID,Departamento,Total Asistencias\n";
+            Object.entries(userCounts).forEach(([id, data]) => {
+                csvContent += `"${data.name}","${id}","${data.department}","${data.count}"\n`;
+            });
+
+            downloadCSV(csvContent, `reporte_resumen_${new Date().toISOString().slice(0,10)}.csv`);
+        }
+
+        // Función auxiliar para descargar CSV
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('Archivo descargado exitosamente');
+        }
+
+        // Imprimir reporte
+        function printReport() {
+            window.print();
+        }
+
+        // Actualizar reloj
+        function updateClock() {
+            const now = new Date();
+            const timeElement = document.querySelector('.status-badge');
+            if (timeElement) {
+                timeElement.innerHTML = `
+                    <span class="material-icons" style="font-size: 1.1rem; vertical-align: middle; margin-right: 8px;">access_time</span>
+                    ${now.toLocaleTimeString('es-ES')}
+                `;
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inicializando página de reportes...');
+            
+            initializeDates();
+            loadDepartments();
+            applyFilters(); // Cargar datos con filtros por defecto
+            
+            console.log('Página de reportes inicializada correctamente');
+        });
+
+        // Actualizar reloj cada segundo
+        setInterval(updateClock, 1000);
+    </script>
 </body>
 </html>
