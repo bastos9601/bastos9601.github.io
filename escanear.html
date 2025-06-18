@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencia QR - Escáner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <link rel="stylesheet" href="assets/css/asistencia.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="/assets/IMG/LOGO DSI-2022.png" alt="Logo DSI">
+                        <span class="logo-text">CONTROL DE ASISTENCIA</span>
+                    </a>
+                </div>
+                <div class="status-badge">
+                    <span class="material-icons" style="font-size: 1.1rem; vertical-align: middle; margin-right: 8px;">access_time</span>
+                    Sistema Activo
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Navegación por pestañas -->
+        <div class="nav-tabs">
+            <button class="tab-button" onclick="window.location.href='index.html'">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">qr_code</span>
+                GENERAR QR
+            </button>
+            <button class="tab-button active">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">qr_code_scanner</span>
+                ESCANEAR
+            </button>
+            <button class="tab-button" onclick="window.location.href='asistencia.html'">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">people</span>
+                ASISTENCIA
+            </button>
+            <button class="tab-button" onclick="window.location.href='reportes.html'">
+                <span class="material-icons" style="font-size: 1.3rem; margin-right: 8px;">assessment</span>
+                REPORTES
+            </button>
+        </div>
+
+        <!-- Panel: Escáner QR -->
+        <div class="panel active">
+            <h2 class="panel-title">
+                <span class="material-icons" style="font-size: inherit; vertical-align: middle; margin-right: 16px;">qr_code_scanner</span>
+                ESCÁNER DE ASISTENCIA
+            </h2>
+
+            <!-- Controles de cámara -->
+            <div class="camera-container">
+                <div id="cameraControls">
+                    <button id="startScanBtn" class="btn-primary">
+                        <span class="material-icons">videocam</span>
+                        ACTIVAR CÁMARA
+                    </button>
+                    <button id="stopScanBtn" class="btn-secondary hidden">
+                        <span class="material-icons">videocam_off</span>
+                        DETENER CÁMARA
+                    </button>
+                </div>
+
+                <!-- Vista de la cámara -->
+                <div id="cameraView" class="camera-view hidden">
+                    <video id="videoElement" autoplay playsinline></video>
+                    <div class="scanner-overlay"></div>
+                    <canvas id="canvasElement" style="display: none;"></canvas>
+                </div>
+
+                <!-- Instrucciones y estado -->
+                <div class="scanner-instructions">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">info</span>
+                    Posicione el código QR dentro del marco para escanearlo
+                </div>
+
+                <div id="scannerStatus" class="scanner-status scanner-waiting">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">qr_code_scanner</span>
+                    Esperando activación de cámara...
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="grid-item">
+                    <div class="stat-number" id="todayCount">0</div>
+                    <div class="stat-label">ASISTENCIAS HOY</div>
+                </div>
+                <div class="grid-item">
+                    <div class="stat-number" id="totalRegistered">0</div>
+                    <div class="stat-label">PERSONAS REGISTRADAS</div>
+                </div>
+                <div class="grid-item">
+                    <div class="stat-number" id="attendanceRate">0%</div>
+                    <div class="stat-label">TASA DE ASISTENCIA</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/common.js"></script>
+    <script>
+        // Variables del escáner
+        let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || [];
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+        let videoElement = null;
+        let canvasElement = null;
+        let canvasContext = null;
+        let scanning = false;
+        let scanAnimationId = null;
+
+        // Inicializar cámara
+        async function startQRScan() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment', // Usar cámara trasera si está disponible
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+
+                videoElement = document.getElementById('videoElement');
+                videoElement.srcObject = stream;
+                
+                // Mostrar la vista de cámara
+                document.getElementById('cameraView').classList.remove('hidden');
+                document.getElementById('startScanBtn').classList.add('hidden');
+                document.getElementById('stopScanBtn').classList.remove('hidden');
+                
+                // Actualizar estado
+                updateScannerStatus('Cámara activada - Buscando códigos QR...', 'scanner-waiting');
+                
+                // Inicializar canvas
+                canvasElement = document.getElementById('canvasElement');
+                canvasContext = canvasElement.getContext('2d');
+                
+                scanning = true;
+                
+                // Esperar a que el video esté listo
+                videoElement.addEventListener('loadedmetadata', () => {
+                    canvasElement.width = videoElement.videoWidth;
+                    canvasElement.height = videoElement.videoHeight;
+                    requestAnimationFrame(scanQRCode);
+                });
+
+            } catch (error) {
+                console.error('Error al acceder a la cámara:', error);
+                updateScannerStatus('Error: No se pudo acceder a la cámara. Verifique los permisos.', 'scanner-error');
+            }
+        }
+
+        // Detener escáner
+        function stopQRScan() {
+            scanning = false;
+            
+            if (scanAnimationId) {
+                cancelAnimationFrame(scanAnimationId);
+                scanAnimationId = null;
+            }
+
+            if (videoElement && videoElement.srcObject) {
+                const tracks = videoElement.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+                videoElement.srcObject = null;
+            }
+
+            // Ocultar la vista de cámara
+            document.getElementById('cameraView').classList.add('hidden');
+            document.getElementById('startScanBtn').classList.remove('hidden');
+            document.getElementById('stopScanBtn').classList.add('hidden');
+            
+            updateScannerStatus('Cámara detenida - Haga clic en "Activar Cámara" para escanear', 'scanner-waiting');
+        }
+
+        // Escanear código QR
+        function scanQRCode() {
+            if (!scanning || !videoElement || !canvasElement || !canvasContext) {
+                return;
+            }
+
+            if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+                canvasElement.width = videoElement.videoWidth;
+                canvasElement.height = videoElement.videoHeight;
+                canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+
+                const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                
+                if (typeof jsQR !== 'undefined') {
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    
+                    if (code) {
+                        console.log('Código QR detectado:', code.data);
+                        processQRCode(code.data);
+                        return; // Detener escaneo después de encontrar un código
+                    }
+                }
+            }
+
+            if (scanning) {
+                scanAnimationId = requestAnimationFrame(scanQRCode);
+            }
+        }
+
+        // Procesar código QR escaneado
+        function processQRCode(qrData) {
+            try {
+                // Intentar parsear como JSON
+                let userData;
+                try {
+                    userData = JSON.parse(qrData);
+                } catch (e) {
+                    // Si no es JSON, crear objeto simple con el texto
+                    userData = {
+                        id: qrData,
+                        name: 'Usuario Escaneado',
+                        department: 'Sin especificar',
+                        generated: new Date().toISOString()
+                    };
+                }
+
+                // Verificar que el usuario esté registrado
+                const registeredUser = registeredUsers.find(user => user.id === userData.id);
+                if (!registeredUser) {
+                    updateScannerStatus(`Usuario no registrado: ${userData.name || userData.id}`, 'scanner-error');
+                    setTimeout(() => {
+                        updateScannerStatus('Continuando escaneo...', 'scanner-waiting');
+                    }, 3000);
+                    return;
+                }
+
+                // Verificar si ya marcó asistencia hoy
+                const today = new Date().toDateString();
+                const alreadyPresent = attendanceData.some(record => 
+                    record.id === userData.id && 
+                    new Date(record.timestamp).toDateString() === today
+                );
+
+                if (alreadyPresent) {
+                    updateScannerStatus(`${registeredUser.name} ya registró asistencia hoy`, 'scanner-error');
+                    setTimeout(() => {
+                        updateScannerStatus('Continuando escaneo...', 'scanner-waiting');
+                    }, 3000);
+                    return;
+                }
+
+                // Registrar asistencia
+                const attendanceRecord = {
+                    ...registeredUser,
+                    timestamp: new Date().toISOString(),
+                    status: 'present'
+                };
+
+                attendanceData.push(attendanceRecord);
+                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+
+                // Mostrar éxito
+                updateScannerStatus(
+                    `¡Asistencia registrada! ${registeredUser.name} - ${new Date().toLocaleTimeString('es-ES')}`, 
+                    'scanner-success'
+                );
+
+                // Actualizar estadísticas
+                updateStats();
+
+                // Continuar escaneando después de un momento
+                setTimeout(() => {
+                    if (scanning) {
+                        updateScannerStatus('Esperando siguiente código QR...', 'scanner-waiting');
+                    }
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error al procesar QR:', error);
+                updateScannerStatus('Error al procesar código QR', 'scanner-error');
+                setTimeout(() => {
+                    updateScannerStatus('Continuando escaneo...', 'scanner-waiting');
+                }, 2000);
+            }
+        }
+
+        // Actualizar estado del escáner
+        function updateScannerStatus(message, statusClass) {
+            const statusElement = document.getElementById('scannerStatus');
+            statusElement.textContent = message;
+            statusElement.className = `scanner-status ${statusClass}`;
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            const today = new Date();
+            const todayStr = today.toDateString();
+            
+            const todayAttendance = attendanceData.filter(record => 
+                new Date(record.timestamp).toDateString() === todayStr
+            ).length;
+            
+            const totalRegistered = registeredUsers.length;
+            const attendanceRate = totalRegistered > 0 ? 
+                Math.round((todayAttendance / totalRegistered) * 100) : 0;
+
+            document.getElementById('todayCount').textContent = todayAttendance;
+            document.getElementById('totalRegistered').textContent = totalRegistered;
+            document.getElementById('attendanceRate').textContent = attendanceRate + '%';
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inicializando escáner...');
+            
+            // Event listeners
+            document.getElementById('startScanBtn').addEventListener('click', startQRScan);
+            document.getElementById('stopScanBtn').addEventListener('click', stopQRScan);
+            
+            // Actualizar estadísticas
+            updateStats();
+            
+            // Verificar soporte de cámara
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                updateScannerStatus('Error: Su navegador no soporta acceso a cámara', 'scanner-error');
+                document.getElementById('startScanBtn').disabled = true;
+            }
+            
+            console.log('Escáner inicializado correctamente');
+        });
+    </script>
+</body>
+</html>
